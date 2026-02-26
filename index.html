@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Visual de 19 Preguntas</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f0f2f5; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px 40px 40px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            width: 95%;
+            max-width: 900px;
+            text-align: center;
+            position: relative;
+        }
+
+        .pregunta-box { display: none; }
+        
+        .texto-pregunta { 
+            font-size: 1.6em; 
+            margin: 20px 0; 
+            display: block; 
+            font-weight: bold;
+            color: #1c1e21;
+        }
+
+        .bloque-contenido {
+            width: 100%;
+            max-width: 750px; 
+            margin: 0 auto;
+        }
+        
+        .imagen-pregunta {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            object-fit: contain;
+            margin-bottom: 35px;
+            border-radius: 12px;
+            display: block;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .contenedor-opciones {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            width: 100%;
+            margin-bottom: 40px;
+        }
+        
+        .division-opcion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .opcion-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: 2px solid #ced4da;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 1.4em;
+            color: #495057;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .opcion-btn:hover {
+            border-color: #007bff;
+            background-color: #f8fbff;
+            transform: scale(1.05);
+        }
+
+        .opcion-btn.seleccionada {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+        }
+
+        .timer-container {
+            width: 300px;
+            background-color: #e9ecef;
+            border-radius: 20px;
+            margin: 0 auto;
+            height: 8px;
+            overflow: hidden;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: #dc3545;
+        }
+
+        .contador-texto {
+            font-size: 0.95em;
+            color: #6c757d;
+            margin-top: 12px;
+        }
+
+        .btn-primario { padding: 16px 35px; cursor: pointer; border-radius: 12px; border: none; background: #007bff; color: white; font-weight: bold; font-size: 1.1em; transition: 0.3s; }
+        .btn-primario:hover { background: #0056b3; }
+        .btn-pausa { position: absolute; top: 20px; right: 20px; background: #ffc107; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="pantalla-inicio">
+        <h2>Examen de Percepción Visual</h2>
+        <p style="margin-bottom: 35px; color: #4b4b4b;">Tienes 15 segundos para responder cada pregunta.</p>
+        <button id="btnIniciar" class="btn-primario">Comenzar Ahora</button>
+    </div>
+
+    <div id="pantalla-pregunta" class="pregunta-box">
+        <button id="btnPausar" class="btn-pausa">Pausar</button>
+        <span class="texto-pregunta" id="texto-pregunta">Cargando...</span>
+        
+        <div class="bloque-contenido">
+            <div id="espacio-imagen"></div>
+            <div id="contenedor-opciones" class="contenedor-opciones"></div>
+        </div>
+
+        <div class="timer-container">
+            <div id="barra-progreso" class="timer-bar"></div>
+        </div>
+        <p class="contador-texto">Próxima pregunta en <span id="contador-numero">15</span>s</p>
+    </div>
+
+    <div id="pantalla-final" style="display:none;">
+        <h3>¡Examen Finalizado!</h3>
+        <div id="resultado-detalle" style="margin: 25px 0; font-size: 1.8em; font-weight: bold; color: #007bff;"></div>
+        <button onclick="location.reload()" class="btn-primario">Volver a intentar</button>
+    </div>
+</div>
+
+<audio id="reproductor"></audio>
+
+<script>
+    const examenData = [
+        { audio: "1_A.mp3", pregunta: "Pregunta 1", respuestaCorrecta: 0, imagen: "1_A.png" },
+        { audio: "2_A.mp3", pregunta: "Pregunta 2", respuestaCorrecta: 2, imagen: "2_A.png" },
+        { audio: "3_A.mp3", pregunta: "Pregunta 3", respuestaCorrecta: 1, imagen: "3_A.png" },
+        { audio: "4_A.mp3", pregunta: "Pregunta 4", respuestaCorrecta: 1, imagen: "4_A.png" },
+        { audio: "5_A.mp3", pregunta: "Pregunta 5", respuestaCorrecta: 2, imagen: "5_A.png" },
+        { audio: "6_A.mp3", pregunta: "Pregunta 6", respuestaCorrecta: 0, imagen: "6_A.png" },
+        { audio: "7_A.mp3", pregunta: "Pregunta 7", respuestaCorrecta: 3, imagen: "7_A.png" },
+        { audio: "8_A.mp3", pregunta: "Pregunta 8", respuestaCorrecta: 1, imagen: "8_A.png" },
+        { audio: "9_A.mp3", pregunta: "Pregunta 9", respuestaCorrecta: 0, imagen: "9_A.png" },
+        { audio: "10_A.mp3", pregunta: "Pregunta 10", respuestaCorrecta: 2, imagen: "10_A.png" },
+        { audio: "11_A.mp3", pregunta: "Pregunta 11", respuestaCorrecta: 3, imagen: "11_A.png" },
+        { audio: "12_A.mp3", pregunta: "Pregunta 12", respuestaCorrecta: 1, imagen: "12_A.png" },
+        { audio: "13_A.mp3", pregunta: "Pregunta 13", respuestaCorrecta: 3, imagen: "13_A.png" },
+        { audio: "14_A.mp3", pregunta: "Pregunta 14", respuestaCorrecta: 0, imagen: "14_A.png" },
+        { audio: "15_A.mp3", pregunta: "Pregunta 15", respuestaCorrecta: 2, imagen: "15_A.png" },
+        { audio: "16_A.mp3", pregunta: "Pregunta 16", respuestaCorrecta: 0, imagen: "16_A.png" },
+        { audio: "17_A.mp3", pregunta: "Pregunta 17", respuestaCorrecta: 1, imagen: "17_A.png" },
+        { audio: "18_A.mp3", pregunta: "Pregunta 18", respuestaCorrecta: 3, imagen: "18_A.png" },
+        { audio: "19_A.mp3", pregunta: "Pregunta 19", respuestaCorrecta: 3, imagen: "19_A.png" }
+    ];
+
+    let indice = 0, respuestas = [], intervalo, temporizador, enPausa = false, tiempoQueda = 15000;
+    const TOTAL_TIEMPO = 15000; // CAMBIADO A 15 SEGUNDOS (15000ms)
+
+    const btnIniciar = document.getElementById('btnIniciar');
+    const reproductor = document.getElementById('reproductor');
+
+    btnIniciar.onclick = () => {
+        document.getElementById('pantalla-inicio').style.display = 'none';
+        document.getElementById('pantalla-pregunta').style.display = 'block';
+        mostrarPregunta();
+    };
+
+    function mostrarPregunta() {
+        if (indice >= examenData.length) return finalizar();
+        
+        const data = examenData[indice];
+        document.getElementById('texto-pregunta').innerText = data.pregunta;
+        document.getElementById('espacio-imagen').innerHTML = `<img src="${data.imagen}" class="imagen-pregunta">`;
+        
+        const contenedor = document.getElementById('contenedor-opciones');
+        contenedor.innerHTML = '';
+        
+        ['A', 'B', 'C', 'D'].forEach((letra, i) => {
+            const div = document.createElement('div');
+            div.className = 'division-opcion';
+            
+            const btn = document.createElement('button');
+            btn.className = 'opcion-btn';
+            btn.innerText = letra;
+            btn.onclick = () => {
+                document.querySelectorAll('.opcion-btn').forEach(b => b.classList.remove('seleccionada'));
+                btn.classList.add('seleccionada');
+                respuestas[indice] = i;
+            };
+            
+            div.appendChild(btn);
+            contenedor.appendChild(div);
+        });
+
+        reproductor.src = data.audio;
+        reproductor.play().catch(() => {});
+        empezarTimer(TOTAL_TIEMPO);
+    }
+
+    function empezarTimer(ms) {
+        clearInterval(intervalo);
+        clearTimeout(temporizador);
+        tiempoQueda = ms;
+        const barra = document.getElementById('barra-progreso');
+        
+        barra.style.transition = 'none';
+        barra.style.width = (ms / TOTAL_TIEMPO * 100) + '%';
+        
+        setTimeout(() => {
+            barra.style.transition = `width ${ms}ms linear`;
+            barra.style.width = '0%';
+        }, 50);
+
+        intervalo = setInterval(() => {
+            tiempoQueda -= 1000;
+            if (tiempoQueda >= 0) document.getElementById('contador-numero').innerText = Math.ceil(tiempoQueda / 1000);
+        }, 1000);
+
+        temporizador = setTimeout(() => {
+            indice++;
+            mostrarPregunta();
+        }, ms);
+    }
+
+    document.getElementById('btnPausar').onclick = function() {
+        if(!enPausa) {
+            enPausa = true;
+            this.innerText = 'Reanudar';
+            reproductor.pause();
+            clearInterval(intervalo);
+            clearTimeout(temporizador);
+            const barra = document.getElementById('barra-progreso');
+            const w = barra.getBoundingClientRect().width;
+            const pw = barra.parentElement.getBoundingClientRect().width;
+            barra.style.width = (w/pw*100) + '%';
+            barra.style.transition = 'none';
+        } else {
+            enPausa = false;
+            this.innerText = 'Pausar';
+            reproductor.play();
+            empezarTimer(tiempoQueda);
+        }
+    };
+
+    function finalizar() {
+        document.getElementById('pantalla-pregunta').style.display = 'none';
+        document.getElementById('pantalla-final').style.display = 'block';
+        const aciertos = respuestas.filter((r, i) => r === examenData[i].respuestaCorrecta).length;
+        document.getElementById('resultado-detalle').innerText = `Aciertos: ${aciertos} / ${examenData.length}`;
+    }
+</script>
+</body>
+</html>

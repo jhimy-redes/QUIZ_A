@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Examen Visual - Seguridad Máxima</title>
+    <title>Examen Visual Seguro - Blindaje Total</title>
     <style>
-        /* BLOQUEO TOTAL DE SELECCIÓN Y GESTOS */
+        /* --- PROTECCIÓN Y BLOQUEOS --- */
         * {
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            -webkit-touch-callout: none;
             outline: none;
         }
 
@@ -24,6 +25,7 @@
             align-items: center; 
             min-height: 100vh; 
             margin: 0; 
+            color: #333;
             overflow: hidden;
         }
         
@@ -87,17 +89,20 @@
             background-color: #fff;
             cursor: pointer;
             font-size: 1.4em;
+            color: #495057;
             font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: 0.2s;
+            transition: all 0.2s ease-in-out;
         }
 
+        .opcion-btn:hover { border-color: #007bff; background-color: #f8fbff; }
         .opcion-btn.seleccionada {
             background-color: #007bff;
             color: white;
             border-color: #007bff;
+            box-shadow: 0 5px 15px rgba(0,123,255,0.4);
         }
 
         .timer-container {
@@ -115,10 +120,16 @@
             background-color: #dc3545;
         }
 
-        .btn-primario { padding: 16px 35px; cursor: pointer; border-radius: 12px; border: none; background: #007bff; color: white; font-weight: bold; font-size: 1.1em; }
+        .contador-texto {
+            font-size: 0.95em;
+            color: #6c757d;
+            margin-top: 12px;
+        }
+
+        .btn-primario { padding: 16px 35px; cursor: pointer; border-radius: 12px; border: none; background: #007bff; color: white; font-weight: bold; font-size: 1.1em; transition: 0.3s; }
         .btn-pausa { position: absolute; top: 20px; right: 20px; background: #ffc107; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* PANTALLA DE ESPERA DE RED CON LOGO */
+        /* --- PANTALLA CARGA/RED CON LOGO --- */
         #aviso-conexion {
             display: none;
             position: absolute;
@@ -152,13 +163,13 @@
         }
 
         .logo-carga {
-            width: 60px; /* Tamaño del logo central */
+            width: 60px;
             height: 60px;
             object-fit: contain;
             z-index: 10;
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(3600deg); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body oncontextmenu="return false" onkeydown="return false" ondragstart="return false">
@@ -169,13 +180,13 @@
             <div class="spinner-red"></div>
             <img src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png" class="logo-carga" alt="Logo">
         </div>
-        <strong style="color: #dc3545; font-size: 1.2em;">RESTABLECIENDO CONEXIÓN</strong>
-        <p id="mensaje-error" style="color: #666; max-width: 80%;">Esperando respuesta del servidor y validando seguridad...</p>
+        <strong style="color: #dc3545; font-size: 1.3em;">RESTABLECIENDO CONEXIÓN</strong>
+        <p style="color: #666;">Sincronizando imagen y audio para continuar...</p>
     </div>
 
     <div id="pantalla-inicio">
         <h2>Examen de Percepción Visual</h2>
-        <p style="margin-bottom: 35px; color: #4b4b4b;">Seguridad Total: Capturas y atajos bloqueados.</p>
+        <p style="margin-bottom: 35px; color: #4b4b4b;">15 segundos por pregunta. Seguridad blindada activa.</p>
         <button id="btnIniciar" class="btn-primario">Comenzar Ahora</button>
     </div>
 
@@ -195,15 +206,16 @@
     </div>
 
     <div id="pantalla-final" style="display:none;">
-        <h3>Resultado Final</h3>
+        <h3>Examen Finalizado</h3>
         <div id="resultado-detalle" style="margin: 25px 0; font-size: 1.8em; font-weight: bold; color: #007bff;"></div>
-        <button onclick="location.reload()" class="btn-primario">Reiniciar</button>
+        <button onclick="location.reload()" class="btn-primario">Volver a intentar</button>
     </div>
 </div>
 
 <audio id="reproductor"></audio>
 
 <script>
+    /* Respuestas ofuscadas */
     const _k = [0,2,1,1,2,0,3,1,0,2,3,1,3,0,2,0,1,3,3]; 
     const examenData = [
         { audio: "1_A.mp3", pregunta: "Pregunta 1", imagen: "1_A.png" },
@@ -228,62 +240,50 @@
     ];
 
     let indice = 0, respuestas = [], intervalo, temporizador, enPausa = false;
+    let imgOk = false, audioOk = false;
     const TOTAL_TIEMPO = 15000;
 
-    /* --- BLOQUEO AGRESIVO DE CAPTURA --- */
-    window.addEventListener('keydown', (e) => {
-        // Bloqueo Shift + Win + S y Shift + Cmd + 4 (Mac)
-        if (e.shiftKey && (e.metaKey || e.ctrlKey) && (e.key === 'S' || e.key === 's' || e.keyCode == 83)) {
-            pausarPorRed();
-            e.preventDefault();
-        }
-        // Bloqueo PrtSc / Imp Pant / Pet Sis
-        if (e.key === "PrintScreen" || e.keyCode == 44) {
-            pausarPorRed();
-            navigator.clipboard.writeText("ACCESO DENEGADO");
-            e.preventDefault();
-        }
-        // Bloqueo F12 e inspección
-        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) {
-            e.preventDefault();
-        }
-    }, true);
+    const reproductor = document.getElementById('reproductor');
+    const avisoRed = document.getElementById('aviso-conexion');
 
-    /* --- GESTIÓN DE RED EXPERTA --- */
+    /* --- BLOQUEOS DE SEGURIDAD --- */
+    window.addEventListener('keydown', (e) => {
+        // Bloqueo F12, Ctrl+U, Ctrl+Shift+I
+        if (e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || (e.shiftKey && e.keyCode == 73)))) {
+            e.preventDefault(); return false;
+        }
+        // Bloqueo Shift+Win+S e Imp Pant
+        if ((e.shiftKey && (e.metaKey || e.ctrlKey) && e.keyCode == 83) || e.keyCode == 44) {
+            pausarPorRed();
+            navigator.clipboard.writeText("");
+            e.preventDefault();
+        }
+    });
+
+    /* --- GESTIÓN DE RED Y CARGA ESTRICTA --- */
     function pausarPorRed() {
         enPausa = true;
-        document.getElementById('aviso-conexion').style.display = 'flex';
+        avisoRed.style.display = 'flex';
         reproductor.pause();
         clearInterval(intervalo);
         clearTimeout(temporizador);
         document.getElementById('barra-progreso').style.transition = 'none';
     }
 
-    async function reanudarExamen() {
-        if (!navigator.onLine) return; // Si sigue offline, no hace nada
-        
-        try {
-            // Validamos que la imagen actual cargue bien antes de seguir
-            const imgActual = document.querySelector('.imagen-pregunta');
-            if (imgActual) imgActual.src = imgActual.src + "?t=" + new Date().getTime();
-            
-            reproductor.load();
-            await new Promise(r => setTimeout(r, 800)); // Buffer de seguridad
-            
+    function verificarCargaFinal() {
+        if (imgOk && audioOk) {
             enPausa = false;
-            document.getElementById('aviso-conexion').style.display = 'none';
+            avisoRed.style.display = 'none';
             reproductor.play().catch(() => {});
-            empezarTimer(TOTAL_TIEMPO); // Reinicia a 15s al volver la señal
-        } catch (e) {
-            console.log("Esperando recursos...");
+            empezarTimer(TOTAL_TIEMPO);
         }
     }
 
-    window.addEventListener('online', reanudarExamen);
+    window.addEventListener('online', () => { if(enPausa) mostrarPregunta(); });
     window.addEventListener('offline', pausarPorRed);
-    window.addEventListener('blur', pausarPorRed); // Pausa si cambian de app/ventana
+    window.addEventListener('blur', pausarPorRed);
 
-    /* --- LÓGICA DE EXAMEN --- */
+    /* --- LÓGICA DEL EXAMEN --- */
     document.getElementById('btnIniciar').onclick = () => {
         document.getElementById('pantalla-inicio').style.display = 'none';
         document.getElementById('pantalla-pregunta').style.display = 'block';
@@ -292,18 +292,35 @@
 
     function mostrarPregunta() {
         if (indice >= examenData.length) return finalizar();
+        
         const data = examenData[indice];
+        imgOk = false;
+        audioOk = false;
+        enPausa = true;
+
         document.getElementById('texto-pregunta').innerText = data.pregunta;
         
+        // Imagen con validación
         const img = new Image();
         img.className = 'imagen-pregunta';
-        img.src = data.imagen;
-        img.onerror = pausarPorRed; // Si la imagen no carga por internet, pausa
+        img.src = data.imagen + "?v=" + Date.now();
+        img.onload = () => { imgOk = true; verificarCargaFinal(); };
+        img.onerror = pausarPorRed;
         
-        const espacioImg = document.getElementById('espacio-imagen');
-        espacioImg.innerHTML = '';
-        espacioImg.appendChild(img);
-        
+        const espacio = document.getElementById('espacio-imagen');
+        espacio.innerHTML = '';
+        espacio.appendChild(img);
+
+        // Audio con validación
+        reproductor.src = data.audio + "?v=" + Date.now();
+        reproductor.oncanplaythrough = () => { audioOk = true; verificarCargaFinal(); };
+        reproductor.onerror = pausarPorRed;
+        reproductor.load();
+
+        // Si tarda más de 3 segundos en cargar y no hay internet, mostramos el aviso
+        setTimeout(() => { if(!imgOk || !audioOk) pausarPorRed(); }, 3000);
+
+        // Render Opciones
         const contenedor = document.getElementById('contenedor-opciones');
         contenedor.innerHTML = '';
         ['A', 'B', 'C', 'D'].forEach((letra, i) => {
@@ -320,12 +337,6 @@
             div.appendChild(btn);
             contenedor.appendChild(div);
         });
-
-        reproductor.src = data.audio;
-        reproductor.onerror = pausarPorRed; // Si el audio falla, pausa
-        reproductor.play().catch(() => {});
-        
-        empezarTimer(TOTAL_TIEMPO);
     }
 
     function empezarTimer(ms) {
@@ -333,7 +344,7 @@
         clearTimeout(temporizador);
         if (enPausa) return;
 
-        let tiempoRestante = ms;
+        let queda = ms;
         const barra = document.getElementById('barra-progreso');
         barra.style.transition = 'none';
         barra.style.width = '100%';
@@ -346,8 +357,8 @@
 
         intervalo = setInterval(() => {
             if (!enPausa) {
-                tiempoRestante -= 1000;
-                if (tiempoRestante >= 0) document.getElementById('contador-numero').innerText = Math.ceil(tiempoRestante / 1000);
+                queda -= 1000;
+                if (queda >= 0) document.getElementById('contador-numero').innerText = Math.ceil(queda / 1000);
             }
         }, 1000);
 
@@ -363,9 +374,11 @@
         if(!enPausa) {
             pausarPorRed();
             this.innerText = 'Reanudar';
+            avisoRed.style.display = 'none'; // Pausa manual no muestra el spinner
         } else {
             this.innerText = 'Pausar';
-            reanudarExamen();
+            imgOk = true; audioOk = true; // Forzamos validación en pausa manual
+            verificarCargaFinal();
         }
     };
 

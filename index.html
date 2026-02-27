@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Examen Visual Seguro - Blindaje Total</title>
+    <title>Examen Visual Seguro - Blindaje Pro</title>
     <style>
         /* --- PROTECCIÓN Y BLOQUEOS --- */
         * {
@@ -97,7 +97,6 @@
             transition: all 0.2s ease-in-out;
         }
 
-        .opcion-btn:hover { border-color: #007bff; background-color: #f8fbff; }
         .opcion-btn.seleccionada {
             background-color: #007bff;
             color: white;
@@ -180,13 +179,13 @@
             <div class="spinner-red"></div>
             <img src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png" class="logo-carga" alt="Logo">
         </div>
-        <strong style="color: #dc3545; font-size: 1.3em;">RESTABLECIENDO CONEXIÓN</strong>
-        <p style="color: #666;">Sincronizando imagen y audio para continuar...</p>
+        <strong style="color: #dc3545; font-size: 1.3em;">SIN CONEXIÓN</strong>
+        <p id="texto-estado" style="color: #666;">Reintentando conectar cada segundo...</p>
     </div>
 
     <div id="pantalla-inicio">
         <h2>Examen de Percepción Visual</h2>
-        <p style="margin-bottom: 35px; color: #4b4b4b;">15 segundos por pregunta. Seguridad blindada activa.</p>
+        <p style="margin-bottom: 35px; color: #4b4b4b;">15 segundos por pregunta. El tiempo reinicia si falla la red.</p>
         <button id="btnIniciar" class="btn-primario">Comenzar Ahora</button>
     </div>
 
@@ -202,7 +201,7 @@
         <div class="timer-container">
             <div id="barra-progreso" class="timer-bar"></div>
         </div>
-        <p class="contador-texto">Próxima pregunta en <span id="contador-numero">15</span>s</p>
+        <p class="contador-texto">Pregunta en curso: <span id="contador-numero">15</span>s</p>
     </div>
 
     <div id="pantalla-final" style="display:none;">
@@ -215,7 +214,6 @@
 <audio id="reproductor"></audio>
 
 <script>
-    /* Respuestas ofuscadas */
     const _k = [0,2,1,1,2,0,3,1,0,2,3,1,3,0,2,0,1,3,3]; 
     const examenData = [
         { audio: "1_A.mp3", pregunta: "Pregunta 1", imagen: "1_A.png" },
@@ -241,6 +239,7 @@
 
     let indice = 0, respuestas = [], intervalo, temporizador, enPausa = false;
     let imgOk = false, audioOk = false;
+    let chequeoRedIntervalo = null;
     const TOTAL_TIEMPO = 15000;
 
     const reproductor = document.getElementById('reproductor');
@@ -248,42 +247,71 @@
 
     /* --- BLOQUEOS DE SEGURIDAD --- */
     window.addEventListener('keydown', (e) => {
-        // Bloqueo F12, Ctrl+U, Ctrl+Shift+I
-        if (e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || (e.shiftKey && e.keyCode == 73)))) {
-            e.preventDefault(); return false;
-        }
-        // Bloqueo Shift+Win+S e Imp Pant
+        if (e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || (e.shiftKey && e.keyCode == 73)))) e.preventDefault();
         if ((e.shiftKey && (e.metaKey || e.ctrlKey) && e.keyCode == 83) || e.keyCode == 44) {
             pausarPorRed();
-            navigator.clipboard.writeText("");
             e.preventDefault();
         }
     });
 
-    /* --- GESTIÓN DE RED Y CARGA ESTRICTA --- */
+    /* --- SISTEMA DE RECONEXIÓN AGRESIVA --- */
     function pausarPorRed() {
+        if (enPausa) return;
         enPausa = true;
         avisoRed.style.display = 'flex';
         reproductor.pause();
         clearInterval(intervalo);
         clearTimeout(temporizador);
         document.getElementById('barra-progreso').style.transition = 'none';
-    }
 
-    function verificarCargaFinal() {
-        if (imgOk && audioOk) {
-            enPausa = false;
-            avisoRed.style.display = 'none';
-            reproductor.play().catch(() => {});
-            empezarTimer(TOTAL_TIEMPO);
+        // Forzar chequeo cada segundo
+        if (!chequeoRedIntervalo) {
+            chequeoRedIntervalo = setInterval(() => {
+                if (navigator.onLine) {
+                    console.log("Intentando recuperar recursos...");
+                    cargarRecursosPreguntaActual();
+                }
+            }, 1000);
         }
     }
 
-    window.addEventListener('online', () => { if(enPausa) mostrarPregunta(); });
-    window.addEventListener('offline', pausarPorRed);
-    window.addEventListener('blur', pausarPorRed);
+    function cargarRecursosPreguntaActual() {
+        const data = examenData[indice];
+        imgOk = false;
+        audioOk = false;
 
-    /* --- LÓGICA DEL EXAMEN --- */
+        // Intentar recargar imagen
+        const img = new Image();
+        img.className = 'imagen-pregunta';
+        img.src = data.imagen + "?t=" + Date.now();
+        img.onload = () => { imgOk = true; verificarSiPodemosSeguir(); };
+        img.onerror = () => { console.log("Fallo imagen, reintentando..."); };
+        
+        const espacio = document.getElementById('espacio-imagen');
+        espacio.innerHTML = '';
+        espacio.appendChild(img);
+
+        // Intentar recargar audio
+        reproductor.src = data.audio + "?t=" + Date.now();
+        reproductor.oncanplaythrough = () => { audioOk = true; verificarSiPodemosSeguir(); };
+        reproductor.onerror = () => { console.log("Fallo audio, reintentando..."); };
+        reproductor.load();
+    }
+
+    function verificarSiPodemosSeguir() {
+        if (imgOk && audioOk && navigator.onLine) {
+            clearInterval(chequeoRedIntervalo);
+            chequeoRedIntervalo = null;
+            enPausa = false;
+            avisoRed.style.display = 'none';
+            reproductor.play().catch(() => {});
+            empezarTimer(TOTAL_TIEMPO); // Reinicia el contador a 15s
+        }
+    }
+
+    window.addEventListener('offline', pausarPorRed);
+
+    /* --- FLUJO DEL EXAMEN --- */
     document.getElementById('btnIniciar').onclick = () => {
         document.getElementById('pantalla-inicio').style.display = 'none';
         document.getElementById('pantalla-pregunta').style.display = 'block';
@@ -294,32 +322,8 @@
         if (indice >= examenData.length) return finalizar();
         
         const data = examenData[indice];
-        imgOk = false;
-        audioOk = false;
-        enPausa = true;
-
         document.getElementById('texto-pregunta').innerText = data.pregunta;
         
-        // Imagen con validación
-        const img = new Image();
-        img.className = 'imagen-pregunta';
-        img.src = data.imagen + "?v=" + Date.now();
-        img.onload = () => { imgOk = true; verificarCargaFinal(); };
-        img.onerror = pausarPorRed;
-        
-        const espacio = document.getElementById('espacio-imagen');
-        espacio.innerHTML = '';
-        espacio.appendChild(img);
-
-        // Audio con validación
-        reproductor.src = data.audio + "?v=" + Date.now();
-        reproductor.oncanplaythrough = () => { audioOk = true; verificarCargaFinal(); };
-        reproductor.onerror = pausarPorRed;
-        reproductor.load();
-
-        // Si tarda más de 3 segundos en cargar y no hay internet, mostramos el aviso
-        setTimeout(() => { if(!imgOk || !audioOk) pausarPorRed(); }, 3000);
-
         // Render Opciones
         const contenedor = document.getElementById('contenedor-opciones');
         contenedor.innerHTML = '';
@@ -337,13 +341,13 @@
             div.appendChild(btn);
             contenedor.appendChild(div);
         });
+
+        cargarRecursosPreguntaActual();
     }
 
     function empezarTimer(ms) {
         clearInterval(intervalo);
         clearTimeout(temporizador);
-        if (enPausa) return;
-
         let queda = ms;
         const barra = document.getElementById('barra-progreso');
         barra.style.transition = 'none';
@@ -374,11 +378,12 @@
         if(!enPausa) {
             pausarPorRed();
             this.innerText = 'Reanudar';
-            avisoRed.style.display = 'none'; // Pausa manual no muestra el spinner
+            avisoRed.style.display = 'none'; // No mostramos spinner en pausa voluntaria
+            clearInterval(chequeoRedIntervalo); // Detenemos el auto-reintento en pausa manual
+            chequeoRedIntervalo = null;
         } else {
             this.innerText = 'Pausar';
-            imgOk = true; audioOk = true; // Forzamos validación en pausa manual
-            verificarCargaFinal();
+            cargarRecursosPreguntaActual(); // Al reanudar, verifica conexión y recursos
         }
     };
 

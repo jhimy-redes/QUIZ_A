@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Examen Visual Seguro - Blindaje Pro</title>
+    <title>Escuela de Idiomas del Ejército</title>
     <style>
         /* --- PROTECCIÓN Y BLOQUEOS --- */
         * {
@@ -35,53 +35,147 @@
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.08);
             width: 95%;
-            max-width: 900px;
+            max-width: 1100px; 
             text-align: center;
             position: relative;
+            display: flex; 
+            flex-direction: column;
         }
 
-        .pregunta-box { display: none; }
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .nav-panel {
+            width: 180px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            max-height: 500px;
+            display: none; 
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+        }
+
+        .nav-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.65em;
+            font-weight: bold;
+            color: #6c757d;
+            cursor: pointer;
+        }
+
+        .nav-item.active { border: 2px solid #007bff; color: #007bff; background: #e7f1ff; }
+        .nav-item.answered { background: #28a745; color: white; border-color: #28a745; }
+
+        .content-area { flex: 1; }
+        .pregunta-box { display: none; width: 100%; }
         
+        .header-pregunta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 0 10px;
+        }
+
         .texto-pregunta { 
             font-size: 1.6em; 
-            margin: 20px 0; 
-            display: block; 
             font-weight: bold;
             color: #1c1e21;
+            flex: 1;
+            text-align: center;
+        }
+
+        .tiempo-global {
+            background: #343a40;
+            color: #ffc107;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: 2px solid #ffc107;
         }
 
         .bloque-contenido {
             width: 100%;
-            max-width: 750px; 
+            max-width: 850px; 
             margin: 0 auto;
         }
         
         .imagen-pregunta {
             width: 100%;
             height: auto;
-            max-height: 500px;
+            max-height: 400px;
             object-fit: contain;
             margin-bottom: 35px;
             border-radius: 12px;
             display: block;
             border: 1px solid #f0f0f0;
             pointer-events: none;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .layout-etapa2 {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .img-lateral {
+            flex: 1;
+            max-width: 350px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        .columna-opciones {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
         }
         
-        .contenedor-opciones {
+        .contenedor-opciones-circular {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             width: 100%;
             margin-bottom: 40px;
         }
         
+        .contenedor-opciones-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 40px auto;
+        }
+
         .division-opcion {
             display: flex;
             justify-content: center;
             align-items: center;
         }
         
-        .opcion-btn {
+        .opcion-btn-circular {
             width: 65px;
             height: 65px;
             border-radius: 50%;
@@ -97,7 +191,21 @@
             transition: all 0.2s ease-in-out;
         }
 
-        .opcion-btn.seleccionada {
+        .opcion-btn-vertical {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 2px solid #ced4da;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 1.1em;
+            text-align: left;
+            transition: 0.2s;
+            font-weight: 500;
+            color: #1c1e21;
+        }
+
+        .opcion-btn-circular.seleccionada, .opcion-btn-vertical.seleccionada {
             background-color: #007bff;
             color: white;
             border-color: #007bff;
@@ -105,10 +213,10 @@
         }
 
         .timer-container {
-            width: 300px;
+            width: 100%;
             background-color: #e9ecef;
             border-radius: 20px;
-            margin: 0 auto;
+            margin: 10px auto;
             height: 8px;
             overflow: hidden;
         }
@@ -122,14 +230,34 @@
         .contador-texto {
             font-size: 0.95em;
             color: #6c757d;
-            margin-top: 12px;
+            margin-top: 5px;
         }
 
         .btn-primario { padding: 16px 35px; cursor: pointer; border-radius: 12px; border: none; background: #007bff; color: white; font-weight: bold; font-size: 1.1em; transition: 0.3s; }
-        .btn-pausa { position: absolute; top: 20px; right: 20px; background: #ffc107; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        
+        .btn-pausa { display: none !important; }
 
-        /* --- PANTALLA CARGA/RED CON LOGO --- */
-        #aviso-conexion {
+        .btn-siguiente {
+            margin-top: 20px;
+            padding: 12px 45px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-siguiente:hover { background-color: #218838; }
+
+        #btnGuardarEnviar {
+            display: none;
+            background-color: #000;
+            margin-top: 20px;
+        }
+
+        #aviso-conexion, #pantalla-carga-final {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -141,10 +269,10 @@
             align-items: center;
         }
 
-        .loader-wrapper {
+        .loader-container {
             position: relative;
-            width: 120px;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -161,100 +289,276 @@
             animation: spin 1s linear infinite;
         }
 
-        .logo-carga {
-            width: 60px;
-            height: 60px;
+        .logo-spinner {
+            width: 40px;
+            height: 40px;
             object-fit: contain;
-            z-index: 10;
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #modal-confirmacion {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .input-carnet {
+            padding: 12px;
+            font-size: 1.2em;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            width: 250px;
+            text-align: center;
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+
+        /* Estilos Resultado Final */
+        .card-resultado {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            border-top: 6px solid #28a745;
+            text-align: center;
+        }
+        .detalle-estudiante {
+            text-align: left;
+            display: inline-block;
+            margin: 20px 0;
+            font-size: 1.1em;
+            line-height: 2;
+        }
+        .nota-final {
+            font-size: 2em;
+            color: #007bff;
+            margin-top: 15px;
+            font-weight: bold;
+            display: block;
+        }
     </style>
 </head>
-<body oncontextmenu="return false" onkeydown="return false" ondragstart="return false">
+<body oncontextmenu="return false" onkeydown="return manejarBloqueoTeclado(event)" ondragstart="return false">
+
+<div id="modal-confirmacion">
+    <div class="modal-content">
+        <h3>¿Confirmar Envío?</h3>
+        <p>Una vez enviado, no podrá corregir sus respuestas.</p>
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+            <button onclick="cerrarModal()" class="btn-siguiente" style="background:#6c757d; padding:10px 20px;">Cancelar</button>
+            <button onclick="procesarEnvioFinal()" class="btn-primario" style="padding:10px 20px;">Sí, enviar todo</button>
+        </div>
+    </div>
+</div>
 
 <div class="container">
-    <div id="aviso-conexion">
-        <div class="loader-wrapper">
+    <div id="pantalla-carga-final">
+        <div class="loader-container">
             <div class="spinner-red"></div>
-            <img src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png" class="logo-carga" alt="Logo">
+            <img src="LOGO_EIE.png" class="logo-spinner" id="img-loader">
+        </div>
+        <h3 id="mensaje-carga-final">Procesando...</h3>
+    </div>
+
+    <div id="aviso-conexion">
+        <div class="loader-container">
+            <div class="spinner-red"></div>
+            <img src="LOGO_EIE.png" class="logo-spinner" alt="Cargando...">
         </div>
         <strong style="color: #dc3545; font-size: 1.3em;">SIN CONEXIÓN</strong>
         <p id="texto-estado" style="color: #666;">Reintentando conectar cada segundo...</p>
     </div>
 
     <div id="pantalla-inicio">
-        <h2>Examen de Percepción Visual</h2>
-        <p style="margin-bottom: 35px; color: #4b4b4b;">15 segundos por pregunta. El tiempo reinicia si falla la red.</p>
+        <h2>EIE TEST BOOK 1</h2>
+        <div style="margin-bottom: 20px;">
+            <p>Ingrese su Número de Carnet para comenzar:</p>
+            <input type="text" id="input-carnet" class="input-carnet" placeholder="C.I. del Estudiante" onfocus="enFocoInput=true" onblur="enFocoInput=false">
+        </div>
+        <p style="margin-bottom: 35px; color: #4b4b4b;">Preguntas 1-25: 20 seg. | Preguntas 26-50: Libre.<br>Tiempo total: 45 minutos.</p>
         <button id="btnIniciar" class="btn-primario">Comenzar Ahora</button>
     </div>
 
-    <div id="pantalla-pregunta" class="pregunta-box">
-        <button id="btnPausar" class="btn-pausa">Pausar</button>
-        <span class="texto-pregunta" id="texto-pregunta">Cargando...</span>
-        
-        <div class="bloque-contenido">
-            <div id="espacio-imagen"></div>
-            <div id="contenedor-opciones" class="contenedor-opciones"></div>
+    <div class="main-layout">
+        <div id="nav-panel" class="nav-panel">
+            <h4 style="margin-top:0; font-size: 0.8em; color:#666; letter-spacing: 1px;">NAVEGACIÓN</h4>
+            <div id="nav-grid" class="nav-grid"></div>
         </div>
 
-        <div class="timer-container">
-            <div id="barra-progreso" class="timer-bar"></div>
+        <div id="pantalla-pregunta" class="pregunta-box">
+            <div class="header-pregunta">
+                <span class="texto-pregunta" id="texto-pregunta">Cargando...</span>
+                <div class="tiempo-global" id="reloj-global">45:00</div>
+            </div>
+            
+            <div id="zona-dinamica" class="bloque-contenido">
+                <div id="espacio-imagen"></div>
+                <div id="contenedor-opciones"></div>
+            </div>
+
+            <div id="wrapper-timer">
+                <div class="timer-container">
+                    <div id="barra-progreso" class="timer-bar"></div>
+                </div>
+                <p class="contador-texto">Tiempo pregunta: <span id="contador-numero">20</span>s</p>
+            </div>
+            
+            <button id="btnSiguiente" class="btn-siguiente">Siguiente Pregunta</button>
+            <button id="btnGuardarEnviar" class="btn-primario">Guardar y Enviar Todo</button>
         </div>
-        <p class="contador-texto">Pregunta en curso: <span id="contador-numero">15</span>s</p>
     </div>
 
-    <div id="pantalla-final" style="display:none;">
-        <h3>Examen Finalizado</h3>
-        <div id="resultado-detalle" style="margin: 25px 0; font-size: 1.8em; font-weight: bold; color: #007bff;"></div>
-        <button onclick="location.reload()" class="btn-primario">Volver a intentar</button>
-    </div>
+    <div id="pantalla-final" style="display:none;"></div>
 </div>
 
 <audio id="reproductor"></audio>
 
 <script>
-    const _k = [0,2,1,1,2,0,3,1,0,2,3,1,3,0,2,0,1,3,3]; 
+    // --- CONFIGURACIÓN GOOGLE ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxD3tY2Nt69zjBjb-pa5GJ0D6qrON_GeG2vgYPfK8OQTvx0efSTR6jfN7DP7xt5WD0HbA/exec"; 
+    let datosEstudiante = null;
+
+    // --- NUEVOS CONTADORES DE AUDITORÍA INTEGRADOS ---
+    let examenEnCurso = false;
+    let preguntasVistas = 0;
+    let preguntasRespondidas = 0;
+    let preguntasContadas = new Set(); 
+
+    // --- LÓGICA DE CARNET Y DESBLOQUEO ---
+    let enFocoInput = false;
+    let numCarnet = "";
+
+    function manejarBloqueoTeclado(e) {
+        if (enFocoInput) return true;
+        if (e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || (e.shiftKey && e.keyCode == 73)))) {
+            return false;
+        }
+        return false;
+    }
+
+    // --- DETECTOR DE INCIDENCIAS (RECARGAS/CIERRES) ---
+    window.addEventListener('beforeunload', function (e) {
+        if (examenEnCurso && datosEstudiante) {
+            const datosIncidencia = {
+                action: 'incidencia',
+                fila: datosEstudiante.fila,
+                tipo: "RECARGA O CIERRE DE PESTAÑA",
+                vistas: preguntasVistas,
+                respondidas: preguntasRespondidas
+            };
+            // Beacon envía los datos incluso si la página se está cerrando
+            navigator.sendBeacon(SCRIPT_URL, JSON.stringify(datosIncidencia));
+        }
+    });
+
+    const _k = [0,3,1,1,2,0,3,1,0,2,3,1,3,0,2,0,1,3,3,0,1,2,3,0,1, 1,3,0,1, 2,2,1,2,3,3,0,3,0,1,0,1,3,2,0,3,0,2,2,0,3]; 
+
     const examenData = [
-        { audio: "1_A.mp3", pregunta: "Pregunta 1", imagen: "1_A.png" },
-        { audio: "2_A.mp3", pregunta: "Pregunta 2", imagen: "2_A.png" },
-        { audio: "3_A.mp3", pregunta: "Pregunta 3", imagen: "3_A.png" },
-        { audio: "4_A.mp3", pregunta: "Pregunta 4", imagen: "4_A.png" },
-        { audio: "5_A.mp3", pregunta: "Pregunta 5", imagen: "5_A.png" },
-        { audio: "6_A.mp3", pregunta: "Pregunta 6", imagen: "6_A.png" },
-        { audio: "7_A.mp3", pregunta: "Pregunta 7", imagen: "7_A.png" },
-        { audio: "8_A.mp3", pregunta: "Pregunta 8", imagen: "8_A.png" },
-        { audio: "9_A.mp3", pregunta: "Pregunta 9", imagen: "9_A.png" },
-        { audio: "10_A.mp3", pregunta: "Pregunta 10", imagen: "10_A.png" },
-        { audio: "11_A.mp3", pregunta: "Pregunta 11", imagen: "11_A.png" },
-        { audio: "12_A.mp3", pregunta: "Pregunta 12", imagen: "12_A.png" },
-        { audio: "13_A.mp3", pregunta: "Pregunta 13", imagen: "13_A.png" },
-        { audio: "14_A.mp3", pregunta: "Pregunta 14", imagen: "14_A.png" },
-        { audio: "15_A.mp3", pregunta: "Pregunta 15", imagen: "15_A.png" },
-        { audio: "16_A.mp3", pregunta: "Pregunta 16", imagen: "16_A.png" },
-        { audio: "17_A.mp3", pregunta: "Pregunta 17", imagen: "17_A.png" },
-        { audio: "18_A.mp3", pregunta: "Pregunta 18", imagen: "18_A.png" },
-        { audio: "19_A.mp3", pregunta: "Pregunta 19", imagen: "19_A.png" }
+        { audio: "1_A.mp3", pregunta: "Pregunta 1", imagen: "1_A.png", tipo: "visual" },
+        { audio: "2_A.mp3", pregunta: "Pregunta 2", imagen: "2_A.png", tipo: "visual" },
+        { audio: "3_A.mp3", pregunta: "Pregunta 3", imagen: "3_A.png", tipo: "visual" },
+        { audio: "4_A.mp3", pregunta: "Pregunta 4", imagen: "4_A.png", tipo: "visual" },
+        { audio: "5_A.mp3", pregunta: "Pregunta 5", imagen: "5_A.png", tipo: "visual" },
+        { audio: "6_A.mp3", pregunta: "Pregunta 6", imagen: "6_A.png", tipo: "visual" },
+        { audio: "7_A.mp3", pregunta: "Pregunta 7", imagen: "7_A.png", tipo: "visual" },
+        { audio: "8_A.mp3", pregunta: "Pregunta 8", imagen: "8_A.png", tipo: "visual" },
+        { audio: "9_A.mp3", pregunta: "Pregunta 9", imagen: "9_A.png", tipo: "visual" },
+        { audio: "10_A.mp3", pregunta: "Pregunta 10", imagen: "10_A.png", tipo: "visual" },
+        { audio: "11_A.mp3", pregunta: "Pregunta 11", imagen: "11_A.png", tipo: "visual" },
+        { audio: "12_A.mp3", pregunta: "Pregunta 12", imagen: "12_A.png", tipo: "visual" },
+        { audio: "13_A.mp3", pregunta: "Pregunta 13", imagen: "13_A.png", tipo: "visual" },
+        { audio: "14_A.mp3", pregunta: "Pregunta 14", imagen: "14_A.png", tipo: "visual" },
+        { audio: "15_A.mp3", pregunta: "Pregunta 15", imagen: "15_A.png", tipo: "visual" },
+        { audio: "16_A.mp3", pregunta: "Pregunta 16", imagen: "16_A.png", tipo: "visual" },
+        { audio: "17_A.mp3", pregunta: "Pregunta 17", imagen: "17_A.png", tipo: "visual" },
+        { audio: "18_A.mp3", pregunta: "Pregunta 18", imagen: "18_A.png", tipo: "visual" },
+        { audio: "19_A.mp3", pregunta: "Pregunta 19", imagen: "19_A.png", tipo: "visual" },
+        { audio: "20_A.mp3", pregunta: "Pregunta 20", tipo: "texto", opciones: ["How are you?", "What are you?", "See you later.", "I'm a student."] },
+        { audio: "21_A.mp3", pregunta: "Pregunta 21", tipo: "texto", opciones: ["It's Monday.", "It's 3 o'clock.", "It's a television.", "It's a notebook."] },
+        { audio: "22_A.mp3", pregunta: "Pregunta 22", tipo: "texto", opciones: ["Five dollars.", "Mary Smith.", "He's a pilot.", "Sit down."] },
+        { audio: "23_A.mp3", pregunta: "Pregunta 23", tipo: "texto", opciones: ["In the lab.", "I'm a cook.", "It's 5 o'clock.", "Fine, thanks."] },
+        { audio: "24_A.mp3", pregunta: "Pregunta 24", tipo: "texto", opciones: ["66", "60", "16", "61"] },
+        { audio: "25_A.mp3", pregunta: "Pregunta 25", tipo: "texto", opciones: ["49", "94", "19", "14"] },
+        { audio: null, pregunta: "26. He is a mechanic. ____ name is Bob Smith.", imagen: "26_A.png", tipo: "etapa2", opciones: ["Her", "His", "Your", "This"] },
+        { audio: null, pregunta: "27. This is a ____.", imagen: "27_A.png", tipo: "etapa2", opciones: ["teacher", "weekend", "window", "classroom"] },
+        { audio: null, pregunta: "28. The box is ____ the table.", imagen: "28_A.png", tipo: "etapa2", opciones: ["on", "under", "to", "in"] },
+        { audio: null, pregunta: "29. The box is ____ the table.", imagen: "29_A.png", tipo: "etapa2", opciones: ["in", "under", "to", "on"] },
+        { audio: null, pregunta: "30. ____ are pilots.", tipo: "texto", opciones: ["He", "I", "They", "She"] },
+        { audio: null, pregunta: "31. They aren't students. ____ teachers?", tipo: "texto", opciones: ["Is he", "Is she", "Are they", "Are we"] },
+        { audio: null, pregunta: "32. ____ the letter D, please.", tipo: "texto", opciones: ["Sit", "Circle", "Turn on", "Turn off"] },
+        { audio: null, pregunta: "33. Please, ____ the board.", tipo: "texto", opciones: ["turn on", "turn off", "look at", "listen to"] },
+        { audio: null, pregunta: "34. That ____ a television.", tipo: "texto", opciones: ["are", "am", "and", "is"] },
+        { audio: null, pregunta: "35. Open the ____.", tipo: "texto", opciones: ["penny", "number", "name", "window"] },
+        { audio: null, pregunta: "36. ____ a mechanic.", tipo: "texto", opciones: ["She's", "We're", "They are", "These are"] },
+        { audio: null, pregunta: "37. Forty-two = ____.", tipo: "texto", opciones: ["14", "24", "40", "42"] },
+        { audio: null, pregunta: "38. A dollar is ____ cents.", tipo: "texto", opciones: ["100", "25", "10", "50"] },
+        { audio: null, pregunta: "39. I ____ a student.", tipo: "texto", opciones: ["is", "am", "are", "and"] },
+        { audio: null, pregunta: "40. These are ____.", tipo: "texto", opciones: ["maps", "tape", "penny", "desk"] },
+        { audio: null, pregunta: "41. Close the ____.", tipo: "texto", opciones: ["nickel", "door", "name", "number"] },
+        { audio: null, pregunta: "42. Those ____ pencils.", tipo: "texto", opciones: ["is", "am", "and", "are"] },
+        { audio: null, pregunta: "43. ____ the box on the table.", tipo: "texto", opciones: ["Listen", "Up", "Put", "Go"] },
+        { audio: null, pregunta: "44. Bill: Listen to the tape. ____ write. \n Tom: Okay.", tipo: "texto", opciones: ["Don't", "Hello", "What", "Good-bye"] },
+        { audio: null, pregunta: "45. Bill: Please, spell that. \n Tom: It's ____.", tipo: "texto", opciones: ["$10", "5 cents", "a dollar", "J-o-e"] },
+        { audio: null, pregunta: "46. Bill: What's that? \n Tom: ____ a radio.", tipo: "texto", opciones: ["It's", "She's", "He's", "I'm"] },
+        { audio: null, pregunta: "47. Bill: Is that his dollar? \n Tom: Yes, ____.", tipo: "texto", opciones: ["he is", "I am", "it is", "they are"] },
+        { audio: null, pregunta: "48. Bill: Is Joe a barber? \n Tom: No, he ____ a barber.", tipo: "texto", opciones: ["not", "isn't not", "isn't", "is"] },
+        { audio: null, pregunta: "49. Bill: ____ Sam? \n Tom: He's a teacher.", tipo: "texto", opciones: ["What's", "This", "Is", "It"] },
+        { audio: null, pregunta: "50. Bill: Good Morning. It's 7:30. It's time for class. \n Tom: No, it isn't. It's the ____.", tipo: "texto", opciones: ["clock", "number", "calendar", "weekend"] }
     ];
 
     let indice = 0, respuestas = [], intervalo, temporizador, enPausa = false;
-    let imgOk = false, audioOk = false;
+    let imgOk = false, audioOk = false, modoRevision = false;
     let chequeoRedIntervalo = null;
-    const TOTAL_TIEMPO = 15000;
+    
+    const TIEMPO_PREGUNTA_1_25 = 20000;
+    let tiempoGlobalSegundos = 45 * 60;
+    let intervaloGlobal;
 
     const reproductor = document.getElementById('reproductor');
     const avisoRed = document.getElementById('aviso-conexion');
 
-    /* --- BLOQUEOS DE SEGURIDAD --- */
-    window.addEventListener('keydown', (e) => {
-        if (e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || (e.shiftKey && e.keyCode == 73)))) e.preventDefault();
-        if ((e.shiftKey && (e.metaKey || e.ctrlKey) && e.keyCode == 83) || e.keyCode == 44) {
-            pausarPorRed();
-            e.preventDefault();
-        }
-    });
+    function actualizarPanelNavegacion() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = '';
+        examenData.forEach((_, i) => {
+            const item = document.createElement('div');
+            item.className = 'nav-item';
+            if (i === indice) item.classList.add('active');
+            if (respuestas[i] !== undefined && respuestas[i] !== null) item.classList.add('answered');
+            item.innerText = i + 1;
+            item.onclick = () => { if(modoRevision || i >= 25) { indice = i; mostrarPregunta(); } };
+            grid.appendChild(item);
+        });
+    }
 
-    /* --- SISTEMA DE RECONEXIÓN AGRESIVA --- */
+    function iniciarRelojGlobal() {
+        intervaloGlobal = setInterval(() => {
+            if (!enPausa) {
+                tiempoGlobalSegundos--;
+                let m = Math.floor(tiempoGlobalSegundos / 60);
+                let s = tiempoGlobalSegundos % 60;
+                document.getElementById('reloj-global').innerText = 
+                    `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                if (tiempoGlobalSegundos <= 0) {
+                    clearInterval(intervaloGlobal);
+                    procesarEnvioFinal();
+                }
+            }
+        }, 1000);
+    }
+
     function pausarPorRed() {
         if (enPausa) return;
         enPausa = true;
@@ -262,40 +566,28 @@
         reproductor.pause();
         clearInterval(intervalo);
         clearTimeout(temporizador);
-        document.getElementById('barra-progreso').style.transition = 'none';
-
-        // Forzar chequeo cada segundo
         if (!chequeoRedIntervalo) {
-            chequeoRedIntervalo = setInterval(() => {
-                if (navigator.onLine) {
-                    console.log("Intentando recuperar recursos...");
-                    cargarRecursosPreguntaActual();
-                }
-            }, 1000);
+            chequeoRedIntervalo = setInterval(() => { if (navigator.onLine) cargarRecursosPreguntaActual(); }, 1000);
         }
     }
 
     function cargarRecursosPreguntaActual() {
         const data = examenData[indice];
-        imgOk = false;
-        audioOk = false;
+        imgOk = data.tipo === "texto" || !data.imagen; 
+        audioOk = data.audio === null || modoRevision;
 
-        // Intentar recargar imagen
-        const img = new Image();
-        img.className = 'imagen-pregunta';
-        img.src = data.imagen + "?t=" + Date.now();
-        img.onload = () => { imgOk = true; verificarSiPodemosSeguir(); };
-        img.onerror = () => { console.log("Fallo imagen, reintentando..."); };
-        
-        const espacio = document.getElementById('espacio-imagen');
-        espacio.innerHTML = '';
-        espacio.appendChild(img);
-
-        // Intentar recargar audio
-        reproductor.src = data.audio + "?t=" + Date.now();
-        reproductor.oncanplaythrough = () => { audioOk = true; verificarSiPodemosSeguir(); };
-        reproductor.onerror = () => { console.log("Fallo audio, reintentando..."); };
-        reproductor.load();
+        if (data.imagen) {
+            const img = new Image();
+            img.src = data.imagen + "?t=" + Date.now();
+            img.onload = () => { imgOk = true; verificarSiPodemosSeguir(); };
+        }
+        if (data.audio && !modoRevision) {
+            reproductor.src = data.audio + "?t=" + Date.now();
+            reproductor.oncanplaythrough = () => { audioOk = true; verificarSiPodemosSeguir(); };
+            reproductor.load();
+        } else {
+            verificarSiPodemosSeguir();
+        }
     }
 
     function verificarSiPodemosSeguir() {
@@ -304,45 +596,164 @@
             chequeoRedIntervalo = null;
             enPausa = false;
             avisoRed.style.display = 'none';
-            reproductor.play().catch(() => {});
-            empezarTimer(TOTAL_TIEMPO); // Reinicia el contador a 15s
+            if (examenData[indice].audio && !modoRevision) reproductor.play().catch(() => {});
+            
+            if (!modoRevision && indice < 25) {
+                document.getElementById('wrapper-timer').style.visibility = 'visible';
+                empezarTimer(TIEMPO_PREGUNTA_1_25);
+            } else {
+                document.getElementById('wrapper-timer').style.visibility = 'hidden';
+            }
         }
     }
 
     window.addEventListener('offline', pausarPorRed);
 
-    /* --- FLUJO DEL EXAMEN --- */
-    document.getElementById('btnIniciar').onclick = () => {
-        document.getElementById('pantalla-inicio').style.display = 'none';
-        document.getElementById('pantalla-pregunta').style.display = 'block';
-        mostrarPregunta();
+    // --- LOGICA DE VALIDACIÓN ACTUALIZADA ---
+    document.getElementById('btnIniciar').onclick = async () => {
+        const inputCarnet = document.getElementById('input-carnet');
+        const valor = inputCarnet.value.trim();
+        if (valor === "") {
+            alert("Por favor, ingrese su número de carnet.");
+            return;
+        }
+
+        const pantallaCarga = document.getElementById('pantalla-carga-final');
+        const msjCarga = document.getElementById('mensaje-carga-final');
+        
+        pantallaCarga.style.display = 'flex';
+        msjCarga.innerText = "Validando registro y horario...";
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'validar', carnet: valor })
+            });
+            const res = await response.json();
+
+            if (res.success) {
+                if (res.yaRealizo) {
+                    pantallaCarga.style.display = 'none';
+                    alert(`Hola ${res.nombre}, ya realizaste este examen.\nTu nota registrada fue: ${res.nota}`);
+                } else {
+                    datosEstudiante = res;
+                    numCarnet = valor;
+                    examenEnCurso = true; // ACTIVAR SEGUIMIENTO
+                    pantallaCarga.style.display = 'none';
+                    document.getElementById('pantalla-inicio').style.display = 'none';
+                    document.getElementById('nav-panel').style.display = 'block'; 
+                    document.getElementById('pantalla-pregunta').style.display = 'block';
+                    iniciarRelojGlobal();
+                    mostrarPregunta();
+                }
+            } else {
+                pantallaCarga.style.display = 'none';
+                alert(res.mensaje || "Usted no se encuentra habilitado para este examen.");
+            }
+        } catch (e) {
+            pantallaCarga.style.display = 'none';
+            alert("Error de conexión. Intente de nuevo.");
+        }
     };
 
     function mostrarPregunta() {
-        if (indice >= examenData.length) return finalizar();
-        
-        const data = examenData[indice];
-        document.getElementById('texto-pregunta').innerText = data.pregunta;
-        
-        // Render Opciones
-        const contenedor = document.getElementById('contenedor-opciones');
-        contenedor.innerHTML = '';
-        ['A', 'B', 'C', 'D'].forEach((letra, i) => {
-            const div = document.createElement('div');
-            div.className = 'division-opcion';
-            const btn = document.createElement('button');
-            btn.className = 'opcion-btn';
-            btn.innerText = letra;
-            btn.onclick = () => {
-                document.querySelectorAll('.opcion-btn').forEach(b => b.classList.remove('seleccionada'));
-                btn.classList.add('seleccionada');
-                respuestas[indice] = i;
-            };
-            div.appendChild(btn);
-            contenedor.appendChild(div);
-        });
+        if (indice >= examenData.length) {
+            activarModoRevision();
+            return;
+        }
 
+        // --- ACTUALIZAR CONTADORES DE AVANCE ---
+        if (!preguntasContadas.has(indice)) {
+            preguntasVistas++;
+            preguntasContadas.add(indice);
+        }
+        preguntasRespondidas = respuestas.filter(r => r !== undefined && r !== null).length;
+
+        actualizarPanelNavegacion(); 
+        const data = examenData[indice];
+        const zona = document.getElementById('zona-dinamica');
+        zona.innerHTML = '<div id="espacio-imagen"></div><div id="contenedor-opciones"></div>';
+        
+        const espacioImg = document.getElementById('espacio-imagen');
+        const contenedorOpts = document.getElementById('contenedor-opciones');
+
+        if (data.tipo === "visual") {
+            document.getElementById('texto-pregunta').innerText = data.pregunta;
+            contenedorOpts.className = "contenedor-opciones-circular";
+            const img = document.createElement('img');
+            img.className = 'imagen-pregunta';
+            img.src = data.imagen;
+            espacioImg.appendChild(img);
+
+            ['A', 'B', 'C', 'D'].forEach((letra, i) => {
+                const div = document.createElement('div');
+                div.className = 'division-opcion';
+                const btn = document.createElement('button');
+                btn.className = 'opcion-btn-circular' + (respuestas[indice] === i ? ' seleccionada' : '');
+                btn.innerText = letra;
+                btn.onclick = () => {
+                    document.querySelectorAll('.opcion-btn-circular').forEach(b => b.classList.remove('seleccionada'));
+                    btn.classList.add('seleccionada');
+                    respuestas[indice] = i;
+                    actualizarPanelNavegacion();
+                };
+                div.appendChild(btn);
+                contenedorOpts.appendChild(div);
+            });
+        } 
+        else if (data.tipo === "texto") {
+            document.getElementById('texto-pregunta').innerText = data.pregunta;
+            contenedorOpts.className = "contenedor-opciones-vertical";
+            data.opciones.forEach((texto, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'opcion-btn-vertical' + (respuestas[indice] === i ? ' seleccionada' : '');
+                btn.innerHTML = `<strong>${String.fromCharCode(65 + i)}.</strong>  ${texto}`;
+                btn.onclick = () => {
+                    document.querySelectorAll('.opcion-btn-vertical').forEach(b => b.classList.remove('seleccionada'));
+                    btn.classList.add('seleccionada');
+                    respuestas[indice] = i;
+                    actualizarPanelNavegacion();
+                };
+                contenedorOpts.appendChild(btn);
+            });
+        }
+        else if (data.tipo === "etapa2") {
+            document.getElementById('texto-pregunta').innerText = "Segunda Etapa del Examen";
+            zona.innerHTML = `
+                <div class="layout-etapa2">
+                    <img src="${data.imagen}" class="img-lateral">
+                    <div class="columna-opciones">
+                        <p style="font-size:1.3em; font-weight:bold; margin-bottom:15px; text-align: center;">${data.pregunta}</p>
+                        <div id="sub-opts"></div>
+                    </div>
+                </div>`;
+            const subOpts = document.getElementById('sub-opts');
+            data.opciones.forEach((texto, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'opcion-btn-vertical' + (respuestas[indice] === i ? ' seleccionada' : '');
+                btn.style.marginBottom = "8px";
+                btn.innerHTML = `<strong>${String.fromCharCode(65 + i)}.</strong> ${texto}`;
+                btn.onclick = () => {
+                    document.querySelectorAll('.opcion-btn-vertical').forEach(b => b.classList.remove('seleccionada'));
+                    btn.classList.add('seleccionada');
+                    respuestas[indice] = i;
+                    actualizarPanelNavegacion();
+                };
+                subOpts.appendChild(btn);
+            });
+        }
         cargarRecursosPreguntaActual();
+    }
+
+    function activarModoRevision() {
+        modoRevision = true;
+        clearInterval(intervalo);
+        clearTimeout(temporizador);
+        document.getElementById('wrapper-timer').style.display = 'none';
+        document.getElementById('btnSiguiente').style.display = 'none';
+        document.getElementById('btnGuardarEnviar').style.display = 'inline-block';
+        indice = 0; 
+        mostrarPregunta();
     }
 
     function empezarTimer(ms) {
@@ -352,47 +763,98 @@
         const barra = document.getElementById('barra-progreso');
         barra.style.transition = 'none';
         barra.style.width = '100%';
-        
         setTimeout(() => {
             if (enPausa) return;
             barra.style.transition = `width ${ms}ms linear`;
             barra.style.width = '0%';
         }, 50);
-
         intervalo = setInterval(() => {
             if (!enPausa) {
                 queda -= 1000;
                 if (queda >= 0) document.getElementById('contador-numero').innerText = Math.ceil(queda / 1000);
             }
         }, 1000);
-
         temporizador = setTimeout(() => {
-            if (!enPausa) {
-                indice++;
-                mostrarPregunta();
-            }
+            if (!enPausa) { indice++; mostrarPregunta(); }
         }, ms);
     }
 
-    document.getElementById('btnPausar').onclick = function() {
-        if(!enPausa) {
-            pausarPorRed();
-            this.innerText = 'Reanudar';
-            avisoRed.style.display = 'none'; // No mostramos spinner en pausa voluntaria
-            clearInterval(chequeoRedIntervalo); // Detenemos el auto-reintento en pausa manual
-            chequeoRedIntervalo = null;
-        } else {
-            this.innerText = 'Pausar';
-            cargarRecursosPreguntaActual(); // Al reanudar, verifica conexión y recursos
-        }
+    document.getElementById('btnGuardarEnviar').onclick = () => {
+        document.getElementById('modal-confirmacion').style.display = 'flex';
     };
 
-    function finalizar() {
-        document.getElementById('pantalla-pregunta').style.display = 'none';
-        document.getElementById('pantalla-final').style.display = 'block';
-        const aciertos = respuestas.filter((r, i) => r === _k[i]).length;
-        document.getElementById('resultado-detalle').innerText = `Aciertos: ${aciertos} / ${examenData.length}`;
+    function cerrarModal() {
+        document.getElementById('modal-confirmacion').style.display = 'none';
     }
+
+    async function procesarEnvioFinal() {
+        cerrarModal();
+        clearInterval(intervaloGlobal);
+        const pantallaCarga = document.getElementById('pantalla-carga-final');
+        const msjCarga = document.getElementById('mensaje-carga-final');
+        pantallaCarga.style.display = 'flex';
+        msjCarga.innerText = "Guardando respuestas...";
+
+        const aciertos = respuestas.filter((r, i) => r === _k[i]).length;
+        const notaFinal = `${aciertos} / ${examenData.length}`;
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    action: 'guardar', 
+                    fila: datosEstudiante.fila, 
+                    nota: notaFinal,
+                    vistas: preguntasVistas,           // NUEVO
+                    respondidas: preguntasRespondidas  // NUEVO
+                })
+            });
+            const res = await response.json();
+            if (res.success) {
+                examenEnCurso = false; // Desactivar detector de recargas al terminar bien
+                msjCarga.innerText = "¡Datos guardados con éxito!";
+                setTimeout(() => {
+                    pantallaCarga.style.display = 'none';
+                    finalizar(res.fecha, notaFinal);
+                }, 1500);
+            }
+        } catch (e) {
+            alert("Error al guardar en la nube. Imprima su pantalla como respaldo.");
+            finalizar("Error en servidor", notaFinal);
+        }
+    }
+
+    function finalizar(fecha, nota) {
+        document.getElementById('nav-panel').style.display = 'none';
+        document.getElementById('pantalla-pregunta').style.display = 'none';
+        const finalDiv = document.getElementById('pantalla-final');
+        
+        finalDiv.innerHTML = `
+            <div class="card-resultado">
+                <h2 style="color: #28a745; margin-top:0;">Examen Finalizado</h2>
+                <div class="detalle-estudiante">
+                    <p><strong>C.I.:</strong> ${numCarnet}</p>
+                    <p><strong>Estudiante:</strong> ${datosEstudiante.nombre}</p>
+                    <p><strong>Curso:</strong> ${datosEstudiante.curso}</p>
+                    <p><strong>Libro:</strong> ${datosEstudiante.libro}</p>
+                    <p><strong>Fecha/Hora:</strong> ${fecha}</p>
+                    <span class="nota-final">Nota Obtenida: ${nota}</span>
+                </div>
+                <br>
+                <button onclick="window.print()" class="btn-primario" style="background:#6c757d; margin-top:20px;">Imprimir Resultados</button>
+            </div>
+        `;
+        finalDiv.style.display = 'block';
+    }
+
+    document.getElementById('btnSiguiente').onclick = function() {
+        if (!enPausa) {
+            clearInterval(intervalo);
+            clearTimeout(temporizador);
+            indice++;
+            mostrarPregunta();
+        }
+    };
 </script>
 </body>
 </html>
